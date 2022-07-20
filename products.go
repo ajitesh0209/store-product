@@ -1,29 +1,24 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 	"store-product/models"
 	"strconv"
 )
 
 func (a *App) createProduct(responseWrite http.ResponseWriter, request *http.Request) {
-	var product *models.Product
+	var product *models.StoreProduct
 	decoder := json.NewDecoder(request.Body)
 	if err := decoder.Decode(&product); err != nil {
-		fmt.Println(fmt.Errorf("%v", err))
 		respondWithError(responseWrite, http.StatusBadRequest, "Invalid message ")
 		return
 	}
 
 	defer request.Body.Close()
 
-	if err := product.CreateProduct(a.DB); err != nil {
-		respondWithError(responseWrite, http.StatusInternalServerError, err.Error())
-		return
-	}
+	product.CreateProduct(a.DB)
 
 	respondWithJSON(responseWrite, http.StatusCreated, product)
 
@@ -32,6 +27,7 @@ func (a *App) createProduct(responseWrite http.ResponseWriter, request *http.Req
 func (a *App) getProducts(responseWriter http.ResponseWriter, request *http.Request) {
 	count, _ := strconv.Atoi(request.FormValue("count"))
 	start, _ := strconv.Atoi(request.FormValue("start"))
+	var product *models.StoreProduct
 
 	if count > 10 || count < 1 {
 		count = 10
@@ -40,7 +36,7 @@ func (a *App) getProducts(responseWriter http.ResponseWriter, request *http.Requ
 		start = 0
 	}
 
-	products, err := getProducts(a.DB, start, count)
+	products, err := product.GetProducts(a.DB, start, count)
 	if err != nil {
 		respondWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
@@ -58,29 +54,8 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	w.Write(response)
-}
-
-func getProducts(db *sql.DB, start, count int) ([]*models.Product, error) {
-	rows, err := db.Query("SELECT id, store_id, product_id, is_available FROM store_products limit $1 offset $2", count, start)
-
+	_, err := w.Write(response)
 	if err != nil {
-		fmt.Println(fmt.Errorf("%v", err))
-		return nil, err
+		log.Fatal("Error writing response to JSON", err.Error())
 	}
-
-	var products []*models.Product
-
-	defer rows.Close()
-
-	for rows.Next() {
-		p := new(models.Product)
-		if err := rows.Scan(&p.Id, &p.StoreId, &p.ProductId, &p.IsAvailable); err != nil {
-			return nil, err
-		}
-		products = append(products, p)
-	}
-	rows.Close()
-
-	return products, nil
 }

@@ -1,26 +1,26 @@
 package models
 
 import (
-	"database/sql"
-	"fmt"
+	"gorm.io/gorm"
 )
 
-type Product struct {
-	Id          int  `json:"id"`
-	StoreId     int  `json:"store_id"`
-	ProductId   int  `json:"product_id"`
-	IsAvailable bool `json:"is_available"`
+type StoreProduct struct {
+	Id          int  `json:"id" gorm:"primary_key;auto_increment"`
+	StoreId     int  `json:"storeId" gorm:"column:store_id"`
+	ProductId   int  `json:"productId" gorm:"product_id"`
+	IsAvailable bool `json:"isAvailable" gorm:"is_available"`
 }
 
-func (p *Product) CreateProduct(db *sql.DB) error {
-	err := db.QueryRow(
-		"INSERT INTO store_products(store_id, product_id, is_available) VALUES($1, $2, $3) RETURNING id",
-		p.StoreId, p.ProductId, p.IsAvailable).Scan(&p.Id)
+func (p *StoreProduct) CreateProduct(db *gorm.DB) {
+	db.Create(&p)
+}
 
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
+func (p *StoreProduct) CreateMultipleProducts(db *gorm.DB, products []StoreProduct) {
+	db.Create(&products)
+}
 
-	return nil
+func (p *StoreProduct) GetProducts(db *gorm.DB, start, count int) ([]StoreProduct, error) {
+	var products []StoreProduct
+	db.Find(&products).Offset(start).Limit(count)
+	return products, nil
 }
