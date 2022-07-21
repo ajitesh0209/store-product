@@ -15,7 +15,7 @@ type IProductRepository interface {
 type ProductRepository struct {
 }
 
-func InitProductRepo() {
+func InitProductRepository() {
 	productRepository = ProductRepository{}
 }
 

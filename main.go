@@ -15,7 +15,7 @@ func main() {
 		log.Fatalf("Error loading .env file")
 	}
 	database.InitializeDB()
-	repository.InitProductRepo()
+	repository.InitProductRepository()
 	repository.InitStoreProductRepository()
 	router := routers.InitializeRoutes()
 
