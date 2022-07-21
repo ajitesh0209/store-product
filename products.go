@@ -9,14 +9,13 @@ import (
 )
 
 func (a *App) createProduct(responseWrite http.ResponseWriter, request *http.Request) {
+	defer request.Body.Close()
 	var product *models.StoreProduct
 	decoder := json.NewDecoder(request.Body)
 	if err := decoder.Decode(&product); err != nil {
 		respondWithError(responseWrite, http.StatusBadRequest, "Invalid message ")
 		return
 	}
-
-	defer request.Body.Close()
 
 	product.CreateProduct(a.DB)
 
