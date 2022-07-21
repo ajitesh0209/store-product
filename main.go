@@ -3,7 +3,10 @@ package main
 import (
 	"github.com/joho/godotenv"
 	"log"
-	"os"
+	"net/http"
+	"store-product/database"
+	"store-product/repository"
+	"store-product/routers"
 )
 
 func main() {
@@ -11,12 +14,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error loading .env file")
 	}
-	a := App{}
-	a.Initialize(
-		os.Getenv("APP_DB_HOST"),
-		os.Getenv("APP_DB_PORT"),
-		os.Getenv("APP_DB_USERNAME"),
-		os.Getenv("APP_DB_PASSWORD"),
-		os.Getenv("APP_DB_NAME"))
-	a.Run(":8010")
+	database.InitializeDB()
+	repository.InitProductRepo()
+	repository.InitStoreProductRepository()
+	router := routers.InitializeRoutes()
+
+	log.Fatal(http.ListenAndServe(":8010", router))
 }
