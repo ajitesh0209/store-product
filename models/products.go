@@ -15,10 +15,6 @@ func (p *StoreProduct) CreateProduct(db *gorm.DB) {
 	db.Create(&p)
 }
 
-func (p *StoreProduct) CreateMultipleProducts(db *gorm.DB, products []StoreProduct) {
-	db.Create(&products)
-}
-
 func (p *StoreProduct) GetProducts(db *gorm.DB, start, count int) ([]StoreProduct, error) {
 	var products []StoreProduct
 	db.Find(&products).Offset(start).Limit(count)
