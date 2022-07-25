@@ -23,16 +23,6 @@ func executeRequest(req *http.Request, router *mux.Router) *httptest.ResponseRec
 	return rr
 }
 
-func addProducts(count int, db *gorm.DB) {
-	if count < 1 {
-		count = 1
-	}
-
-	for i := 0; i < count; i++ {
-		db.Create(&models.Product{Name: strconv.Itoa(i), Price: float64(10.0 * i)})
-	}
-}
-
 func addStoreProducts(storeId int, productsCount int, db *gorm.DB) {
 	if productsCount < 1 {
 		productsCount = 1

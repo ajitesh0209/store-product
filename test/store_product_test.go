@@ -3,6 +3,7 @@ package test
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/suite"
 	"gorm.io/gorm"
@@ -16,8 +17,9 @@ import (
 
 type StoreProductTestSuite struct {
 	suite.Suite
-	rtr *mux.Router
-	db  *gorm.DB
+	ctrl *gomock.Controller
+	rtr  *mux.Router
+	db   *gorm.DB
 }
 
 func TestStoreProductTestSuite(t *testing.T) {
@@ -63,7 +65,10 @@ func (suite *StoreProductTestSuite) TestAddStoreProducts() {
 	suite.Equal(http.StatusCreated, response.Code)
 
 	products := make([]models.Product, 0)
-	json.Unmarshal(response.Body.Bytes(), &products)
+	err := json.Unmarshal(response.Body.Bytes(), &products)
+	if err != nil {
+		return
+	}
 
 	suite.Equal(len(products), 1)
 	suite.Equal(products[0].Name, "test product")

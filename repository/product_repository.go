@@ -2,6 +2,7 @@ package repository
 
 import (
 	"gorm.io/gorm"
+	"log"
 	"store-product/models"
 )
 
@@ -31,5 +32,8 @@ func (repo *ProductRepository) GetProduct(db *gorm.DB, id int) (*models.Product,
 
 func (repo *ProductRepository) CreateProduct(db *gorm.DB, p *models.Product) error {
 	txn := db.Create(&p)
+	if txn.Error != nil {
+		log.Fatalf("Error Creating Product %v", txn.Error)
+	}
 	return txn.Error
 }
