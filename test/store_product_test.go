@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/suite"
@@ -46,7 +45,6 @@ func (suite *StoreProductTestSuite) TestGetStoreProductsMock() {
 
 	req, _ := http.NewRequest("GET", "http://test.url/store/1/products", nil)
 	response := executeRequest(req, suite.rtr)
-	fmt.Println(response.Body)
 	suite.Equal(http.StatusOK, response.Code)
 }
 
