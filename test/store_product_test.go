@@ -41,9 +41,9 @@ func (suite *StoreProductTestSuite) TestGetStoreProductsMock() {
 	defer mockCtrl.Finish()
 	mockRepo := NewMockIStoreProductRepository(mockCtrl)
 
-	mockRepo.EXPECT().GetProductForStore(gomock.Any()).Return(products, errors.New("test error"))
+	mockRepo.EXPECT().GetProductForStore(gomock.Any()).AnyTimes().Return(products, errors.New("test error"))
 
-	req, _ := http.NewRequest("GET", "http://test.url/store/1/products", nil)
+	req, _ := http.NewRequest(http.MethodGet, "/store/1/products", nil)
 	response := executeRequest(req, suite.rtr)
 	suite.Equal(http.StatusOK, response.Code)
 }
@@ -66,6 +66,18 @@ func (suite *StoreProductTestSuite) TestGetStoreProductsInvalidID() {
 	suite.Equal(http.StatusBadRequest, response.Code)
 }
 
+func (suite *StoreProductTestSuite) TestGetStoreProductsInvalidIdMock() {
+	mockCtrl := gomock.NewController(suite.T())
+	defer mockCtrl.Finish()
+	mockRepo := NewMockIStoreProductRepository(mockCtrl)
+
+	mockRepo.EXPECT().GetProductForStore(gomock.Any()).Times(0)
+
+	req, _ := http.NewRequest(http.MethodGet, "/store/a b/products", nil)
+	response := executeRequest(req, suite.rtr)
+	suite.Equal(http.StatusBadRequest, response.Code)
+}
+
 func (suite *StoreProductTestSuite) TestAddStoreProducts() {
 	var jsonStr = []byte(`{"name":"test product", "price": 11.22}`)
 	req, _ := http.NewRequest("POST", "/store/3/products", bytes.NewBuffer(jsonStr))
@@ -84,6 +96,21 @@ func (suite *StoreProductTestSuite) TestAddStoreProducts() {
 	suite.Equal(products[0].Name, "test product")
 	suite.Equal(products[0].Price, 11.22)
 	suite.Equal(int(products[0].Id), 1)
+}
+
+func (suite *StoreProductTestSuite) TestAddStoreProductsMock() {
+	mockCtrl := gomock.NewController(suite.T())
+	defer mockCtrl.Finish()
+	mockRepo := NewMockIStoreProductRepository(mockCtrl)
+
+	mockRepo.EXPECT().CreateStoreProduct(gomock.Any()).AnyTimes()
+
+	var jsonStr = []byte(`{"name":"test product", "price": 11.22}`)
+	req, _ := http.NewRequest("POST", "/store/3/products", bytes.NewBuffer(jsonStr))
+	req.Header.Set("Content-Type", "application/json")
+
+	response := executeRequest(req, suite.rtr)
+	suite.Equal(http.StatusCreated, response.Code)
 }
 
 func (suite *StoreProductTestSuite) TestAddStoreProductInvalidStoreID() {
