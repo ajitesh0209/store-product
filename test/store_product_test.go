@@ -3,11 +3,13 @@ package test
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"fmt"
+	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/suite"
 	"gorm.io/gorm"
 	"net/http"
-	"store-product/database"
 	"store-product/models"
 	"store-product/repository"
 	"store-product/routers"
@@ -25,11 +27,26 @@ func TestStoreProductTestSuite(t *testing.T) {
 }
 
 func (suite *StoreProductTestSuite) SetupSuite() {
-	database.InitializeDB()
+	//database.InitializeDB()
 	repository.InitProductRepository()
 	repository.InitStoreProductRepository()
 	suite.rtr = routers.InitializeRoutes()
-	suite.db = database.GetConnection()
+	//suite.db = database.GetConnection()
+}
+
+func (suite *StoreProductTestSuite) TestGetStoreProductsMock() {
+	products := []models.Product{{1, "dummyProduct", 11.10}}
+
+	mockCtrl := gomock.NewController(suite.T())
+	defer mockCtrl.Finish()
+	mockRepo := NewMockIStoreProductRepository(mockCtrl)
+
+	mockRepo.EXPECT().GetProductForStore(gomock.Any()).Return(products, errors.New("test error"))
+
+	req, _ := http.NewRequest("GET", "http://test.url/store/1/products", nil)
+	response := executeRequest(req, suite.rtr)
+	fmt.Println(response.Body)
+	suite.Equal(http.StatusOK, response.Code)
 }
 
 func (suite *StoreProductTestSuite) TestGetStoreProducts() {
