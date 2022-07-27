@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"net/http"
-	"store-product/database"
 	"store-product/models"
 	"store-product/repository"
 	"store-product/utils"
@@ -13,6 +12,11 @@ import (
 
 var productRepository *repository.ProductRepository
 
+type IProducts interface {
+	GetProductsById(responseWriter http.ResponseWriter, request *http.Request)
+	AddProducts(writer http.ResponseWriter, request *http.Request)
+}
+
 func GetProductById(responseWriter http.ResponseWriter, request *http.Request) {
 	vars := mux.Vars(request)
 	id, err := strconv.Atoi(vars["id"])
@@ -20,8 +24,7 @@ func GetProductById(responseWriter http.ResponseWriter, request *http.Request) {
 		utils.RespondWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
-
-	products, err := productRepository.GetProduct(database.GetConnection(), id)
+	products, err := productRepository.GetProduct(id)
 	if err != nil {
 		utils.RespondWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
@@ -38,7 +41,7 @@ func AddProducts(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	if err := productRepository.CreateProduct(database.GetConnection(), products); err != nil {
+	if err := productRepository.CreateProduct(products); err != nil {
 		utils.RespondWithError(writer, http.StatusInternalServerError, err.Error())
 		return
 	}

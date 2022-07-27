@@ -12,8 +12,6 @@ import (
 func ClearTable(db *gorm.DB) {
 	db.Unscoped().Delete(&models.Product{})
 	db.Unscoped().Delete(&models.StoreProduct{})
-	db.Exec("ALTER SEQUENCE products_id_seq RESTART WITH 1")
-	db.Exec("ALTER SEQUENCE stores_id_seq RESTART WITH 1")
 }
 
 func executeRequest(req *http.Request, router *mux.Router) *httptest.ResponseRecorder {

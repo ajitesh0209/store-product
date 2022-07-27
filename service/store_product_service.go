@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"net/http"
-	"store-product/database"
 	"store-product/models"
 	"store-product/repository"
 	"store-product/utils"
@@ -12,6 +11,11 @@ import (
 )
 
 var storeProductRepository *repository.StoreProductRepository
+
+type IStoreProduct interface {
+	AddStoreProduct(writer http.ResponseWriter, request *http.Request)
+	GetStoreProductDetails(writer http.ResponseWriter, request *http.Request)
+}
 
 func AddStoreProduct(writer http.ResponseWriter, request *http.Request) {
 	var products *models.StoreProduct
@@ -21,7 +25,7 @@ func AddStoreProduct(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	if err := storeProductRepository.CreateStoreProduct(database.GetConnection(), products); err != nil {
+	if err := storeProductRepository.CreateStoreProduct(products); err != nil {
 		utils.RespondWithError(writer, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -37,7 +41,7 @@ func GetStoreProductDetails(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	products, err := storeProductRepository.GetProductForStore(database.GetConnection(), id)
+	products, err := storeProductRepository.GetProductForStore(id)
 	if err != nil {
 		utils.RespondWithError(writer, http.StatusInternalServerError, err.Error())
 		return

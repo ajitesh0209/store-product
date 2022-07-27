@@ -1,4 +1,4 @@
-package main
+package store_product
 
 import (
 	"github.com/joho/godotenv"
@@ -19,5 +19,6 @@ func main() {
 	repository.InitStoreProductRepository()
 	router := routers.InitializeRoutes()
 
+	log.Println("Running on Port 8010")
 	log.Fatal(http.ListenAndServe(":8010", router))
 }

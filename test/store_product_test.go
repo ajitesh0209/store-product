@@ -3,7 +3,6 @@ package test
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/suite"
 	"gorm.io/gorm"
@@ -17,9 +16,8 @@ import (
 
 type StoreProductTestSuite struct {
 	suite.Suite
-	ctrl *gomock.Controller
-	rtr  *mux.Router
-	db   *gorm.DB
+	rtr *mux.Router
+	db  *gorm.DB
 }
 
 func TestStoreProductTestSuite(t *testing.T) {
@@ -32,10 +30,6 @@ func (suite *StoreProductTestSuite) SetupSuite() {
 	repository.InitStoreProductRepository()
 	suite.rtr = routers.InitializeRoutes()
 	suite.db = database.GetConnection()
-}
-
-func (suite *StoreProductTestSuite) BeforeTest(suiteName, testName string) {
-	ClearTable(suite.db)
 }
 
 func (suite *StoreProductTestSuite) TestGetStoreProducts() {
@@ -57,8 +51,8 @@ func (suite *StoreProductTestSuite) TestGetStoreProductsInvalidID() {
 }
 
 func (suite *StoreProductTestSuite) TestAddStoreProducts() {
-	var jsonStr = []byte(`[{"name":"test product", "price": 11.22}]`)
-	req, _ := http.NewRequest("POST", "/store/1", bytes.NewBuffer(jsonStr))
+	var jsonStr = []byte(`{"name":"test product", "price": 11.22}`)
+	req, _ := http.NewRequest("POST", "/store/3/products", bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
 
 	response := executeRequest(req, suite.rtr)
@@ -82,7 +76,7 @@ func (suite *StoreProductTestSuite) TestAddStoreProductInvalidStoreID() {
 	req.Header.Set("Content-Type", "application/json")
 
 	response := executeRequest(req, suite.rtr)
-	suite.Equal(http.StatusBadRequest, response.Code)
+	suite.Equal(http.StatusNotFound, response.Code)
 }
 
 func (suite *StoreProductTestSuite) TestAddStoreProductNonExistentStoreID() {
@@ -96,18 +90,9 @@ func (suite *StoreProductTestSuite) TestAddStoreProductNonExistentStoreID() {
 
 func (suite *StoreProductTestSuite) TestAddStoreProductInvalidPayload() {
 	var jsonStr = []byte(`[{"name":123, "price": 11.22}]`)
-	req, _ := http.NewRequest("POST", "/store/1", bytes.NewBuffer(jsonStr))
+	req, _ := http.NewRequest("POST", "/store/2/products", bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
 
 	response := executeRequest(req, suite.rtr)
 	suite.Equal(http.StatusBadRequest, response.Code)
-}
-
-func (suite *StoreProductTestSuite) TestGetStoreProductsNonExistentStoreID() {
-	req, _ := http.NewRequest("GET", "/store/1/products", nil)
-
-	response := executeRequest(req, suite.rtr)
-
-	suite.Equal(http.StatusNotFound, response.Code)
-
 }

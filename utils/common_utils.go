@@ -6,6 +6,13 @@ import (
 	"net/http"
 )
 
+type Response struct {
+	Code    int
+	Payload interface{}
+}
+
+type Fields map[string]interface{}
+
 func RespondWithError(w http.ResponseWriter, code int, message string) {
 	RespondWithJSON(w, code, map[string]string{"error": message})
 }
