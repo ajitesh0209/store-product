@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gorm.io/gorm"
 	"net/http"
+	"store-product/database"
 	"store-product/models"
 	"store-product/repository"
 	"store-product/routers"
@@ -27,11 +28,11 @@ func TestStoreProductTestSuite(t *testing.T) {
 }
 
 func (suite *StoreProductTestSuite) SetupSuite() {
-	//database.InitializeDB()
+	database.InitializeDB()
 	repository.InitProductRepository()
 	repository.InitStoreProductRepository()
 	suite.rtr = routers.InitializeRoutes()
-	//suite.db = database.GetConnection()
+	suite.db = database.GetConnection()
 }
 
 func (suite *StoreProductTestSuite) TestGetStoreProductsMock() {
